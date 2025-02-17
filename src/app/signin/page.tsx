@@ -18,7 +18,7 @@ export default function SignInPage() {
                     Welcome to Our Agent
                 </Typography>
                 <Typography variant="body2" color="textSecondary" paragraph className="text-center">
-                    Sign in to start chatting with your agent.
+                    Sign in to start chatting with agent.
                 </Typography>
 
                 {/* Sign-in Button */}

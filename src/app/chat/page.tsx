@@ -64,7 +64,7 @@ export default function ChatPage() {
         <div className="flex flex-col h-screen px-4 bg-gray-100"> {/* Background color applied here */}
             {/* Navbar */}
             <nav className="bg-gray-800 text-white p-4 flex justify-between items-center">
-                <Typography variant="h6">ChatApp</Typography>
+                <Typography variant="h6">AI Document Analyzer</Typography>
                 <Button variant="contained" color="error" onClick={handleLogout}>Logout</Button>
             </nav>
 

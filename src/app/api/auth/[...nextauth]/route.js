@@ -11,10 +11,10 @@ const handler = NextAuth({
     ],
     adapter: await getMongoDBAdapter(),
     callbacks: {
-        async signIn({ user }) {
+        async signIn() {
             return true;
         },
-        async redirect({ url, baseUrl }) {
+        async redirect() {
             return "/chat";
         },
     },

@@ -1,13 +1,10 @@
 'use client';
-
-import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { Button, Typography } from '@mui/material';
 import DocumentUploadSection from '@/app/components/DocumentUploadSection';
 import ChatSection from '@/app/components/ChatSection';
+import Header from '@/app/components/Header';
 
 export default function ChatPage() {
-    const router = useRouter();
     const chatHistoryEndRef = useRef<HTMLDivElement>(null); // Reference to scroll to the last message
 
     const [pdfFiles, setPdfFiles] = useState<File[]>([]); // State to store uploaded PDF files
@@ -16,10 +13,6 @@ export default function ChatPage() {
         { sender: "Bot", message: "Hello! How can I help you?", timestamp: "2025-02-17 12:01" },
     ]); // Sample chat history
     const [isPdfUploaded, setIsPdfUploaded] = useState(false); // State to check if PDF is uploaded
-
-    const handleLogout = () => {
-        router.push('/signin');
-    };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -63,10 +56,7 @@ export default function ChatPage() {
     return (
         <div className="flex flex-col h-screen px-4 bg-gray-100"> {/* Background color applied here */}
             {/* Navbar */}
-            <nav className="bg-gray-800 text-white p-4 flex justify-between items-center">
-                <Typography variant="h6">AI Document Analyzer</Typography>
-                <Button variant="contained" color="error" onClick={handleLogout}>Logout</Button>
-            </nav>
+            <Header />
 
             {/* Main Content with Horizontal Layout */}
             <div className="flex-1 flex flex-row space-x-4 mt-4">

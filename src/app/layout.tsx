@@ -1,3 +1,6 @@
+"use client"
+
+import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 
 export default function RootLayout({
@@ -26,7 +29,7 @@ export default function RootLayout({
 			<body
 				className={`antialiased`}
 			>
-				{children}
+				<SessionProvider>{children}</SessionProvider>
 			</body>
 		</html>
 	);

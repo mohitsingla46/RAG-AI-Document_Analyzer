@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { Button, Typography } from '@mui/material';
-import DocumentUploadSection from '../components/DocumentUploadSection';
-import ChatSection from '../components/ChatSection';
+import DocumentUploadSection from '@/app/components/DocumentUploadSection';
+import ChatSection from '@/app/components/ChatSection';
 
 export default function ChatPage() {
     const router = useRouter();

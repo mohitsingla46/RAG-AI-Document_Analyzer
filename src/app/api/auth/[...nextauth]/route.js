@@ -10,6 +10,7 @@ const handler = NextAuth({
         }),
     ],
     adapter: await getMongoDBAdapter(),
+    session: { strategy: "jwt" },
     callbacks: {
         async signIn() {
             return true;

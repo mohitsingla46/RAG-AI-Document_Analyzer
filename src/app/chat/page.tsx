@@ -5,27 +5,46 @@ import ChatSection from '@/app/components/ChatSection';
 import Header from '@/app/components/Header';
 
 export default function ChatPage() {
-    const chatHistoryEndRef = useRef<HTMLDivElement>(null); // Reference to scroll to the last message
+    const chatHistoryEndRef = useRef<HTMLDivElement>(null);
 
-    const [pdfFiles, setPdfFiles] = useState<File[]>([]); // State to store uploaded PDF files
+    const [pdfFiles, setPdfFiles] = useState<File[]>([]);
     const [chatHistory, setChatHistory] = useState([
         { sender: "User", message: "Hi there!", timestamp: "2025-02-17 12:00" },
         { sender: "Bot", message: "Hello! How can I help you?", timestamp: "2025-02-17 12:01" },
-    ]); // Sample chat history
-    const [isPdfUploaded, setIsPdfUploaded] = useState(false); // State to check if PDF is uploaded
+    ]);
+    const [isPdfUploaded, setIsPdfUploaded] = useState(false);
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
-        if (files) {
-            setPdfFiles(prevFiles => [...prevFiles, ...Array.from(files)]);
-            setIsPdfUploaded(true); // Set flag to true when a file is uploaded
+        if (!files) return;
+
+        const newFiles = Array.from(files);
+        setPdfFiles(prevFiles => [...prevFiles, ...newFiles]);
+        setIsPdfUploaded(true);
+
+        for (const file of newFiles) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) throw new Error('Upload failed');
+
+                console.log(`Uploaded ${file.name} successfully!`);
+            } catch (error) {
+                console.error(`Error uploading ${file.name}:`, error);
+            }
         }
     };
 
     const handleDeleteFile = (fileName: string) => {
         setPdfFiles(prevFiles => prevFiles.filter(file => file.name !== fileName));
         if (pdfFiles.length === 1) {
-            setIsPdfUploaded(false); // Reset flag if there are no more PDFs uploaded
+            setIsPdfUploaded(false);
         }
     };
 
@@ -37,7 +56,6 @@ export default function ChatPage() {
         };
         setChatHistory(prevHistory => [...prevHistory, newMessage]);
 
-        // Simulate a bot reply (you can modify this with actual bot logic later)
         const botReply = {
             sender: "Bot",
             message: "Bot: " + message,
@@ -46,28 +64,23 @@ export default function ChatPage() {
         setChatHistory(prevHistory => [...prevHistory, botReply]);
     };
 
-    // Scroll to the bottom of chat history when a new message is added
     useEffect(() => {
         if (chatHistoryEndRef.current) {
             chatHistoryEndRef.current.scrollTop = chatHistoryEndRef.current.scrollHeight;
         }
-    }, [chatHistory]); // Trigger on chat history update
+    }, [chatHistory]);
 
     return (
-        <div className="flex flex-col h-screen px-4 bg-gray-100"> {/* Background color applied here */}
-            {/* Navbar */}
+        <div className="flex flex-col h-screen px-4 bg-gray-100">
             <Header />
 
-            {/* Main Content with Horizontal Layout */}
             <div className="flex-1 flex flex-row space-x-4 mt-4">
-                {/* PDF Upload Section */}
                 <DocumentUploadSection
                     pdfFiles={pdfFiles}
                     handleFileChange={handleFileChange}
                     handleDeleteFile={handleDeleteFile}
                 />
 
-                {/* Chat Section */}
                 <ChatSection
                     chatHistory={chatHistory}
                     handleSendMessage={handleSendMessage}

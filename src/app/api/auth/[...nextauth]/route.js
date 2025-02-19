@@ -1,8 +1,8 @@
-import NextAuth from "next-auth"
-import GoogleProvider from "next-auth/providers/google"
-import { getMongoDBAdapter } from '../../../lib/nextAuthMongo';
+import NextAuth from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+import { getMongoDBAdapter } from "../../../lib/nextAuthMongo";
 
-const handler = NextAuth({
+export const authOptions = {
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
@@ -12,6 +12,18 @@ const handler = NextAuth({
     adapter: await getMongoDBAdapter(),
     session: { strategy: "jwt" },
     callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                token.id = user.id; // Attach user ID to JWT
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (session.user) {
+                session.user.id = token.id; // Pass user ID to session
+            }
+            return session;
+        },
         async signIn() {
             return true;
         },
@@ -20,6 +32,8 @@ const handler = NextAuth({
         },
     },
     secret: process.env.NEXTAUTH_SECRET,
-})
+};
 
-export { handler as GET, handler as POST }
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST };

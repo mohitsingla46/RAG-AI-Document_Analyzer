@@ -1,9 +1,21 @@
 'use client';
-import { Button, Typography } from '@mui/material';
+import { useState } from 'react';
+import { Button, Typography, CircularProgress } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import { signIn } from 'next-auth/react';
 
 export default function Home() {
+	const [loading, setLoading] = useState(false);
+
+	const handleSignIn = async () => {
+		setLoading(true);
+		try {
+			await signIn('google');
+		} catch (error) {
+			setLoading(false);
+		}
+	};
+
 	return (
 		<div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
 			<div className="p-8 rounded-lg w-full max-w-md">
@@ -19,18 +31,19 @@ export default function Home() {
 					variant="contained"
 					color="primary"
 					fullWidth
-					startIcon={<GoogleIcon />}
-					onClick={() => signIn('google')}
+					startIcon={!loading && <GoogleIcon />}
+					disabled={loading}
+					onClick={handleSignIn}
 					sx={{
 						textTransform: 'none',
 						padding: '12px',
 						borderRadius: '8px',
 						'&:hover': {
-							backgroundColor: '#1565c0',
+							backgroundColor: loading ? '#1976d2' : '#1565c0',
 						},
 					}}
 				>
-					Sign in with Google
+					{loading ? <CircularProgress size={24} color="inherit" /> : 'Sign in with Google'}
 				</Button>
 			</div>
 		</div>

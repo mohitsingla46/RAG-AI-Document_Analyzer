@@ -1,7 +1,7 @@
 import { MemorySaver, MessagesAnnotation, StateGraph } from "@langchain/langgraph";
 import { ToolNode, toolsCondition } from "@langchain/langgraph/prebuilt";
-import { llm } from "@backend/config/llm.js";
-import { retrieve } from "@backend/services/retriever.js";
+import { llm } from "@/app/backend/config/llm.js";
+import { retrieve } from "@/app/backend/services/retriever.js";
 import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from "@langchain/core/messages";
 
 async function queryOrRespond(state) {

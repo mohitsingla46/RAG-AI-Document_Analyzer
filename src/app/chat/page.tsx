@@ -8,10 +8,7 @@ export default function ChatPage() {
     const chatHistoryEndRef = useRef<HTMLDivElement>(null);
 
     const [pdfFiles, setPdfFiles] = useState<File[]>([]);
-    const [chatHistory, setChatHistory] = useState([
-        { sender: "User", message: "Hi there!", timestamp: "2025-02-17 12:00" },
-        { sender: "Bot", message: "Hello! How can I help you?", timestamp: "2025-02-17 12:01" },
-    ]);
+    const [chatHistory, setChatHistory] = useState<{ sender: string; message: string; }[]>([]);
     const [isPdfUploaded, setIsPdfUploaded] = useState(false);
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,7 +16,7 @@ export default function ChatPage() {
         if (!files) return;
 
         const newFiles = Array.from(files);
-        setPdfFiles(prevFiles => [...prevFiles, ...newFiles]);
+        setPdfFiles(newFiles);
         setIsPdfUploaded(true);
 
         for (const file of newFiles) {
@@ -33,35 +30,71 @@ export default function ChatPage() {
                 });
 
                 if (!response.ok) throw new Error('Upload failed');
-
-                console.log(`Uploaded ${file.name} successfully!`);
             } catch (error) {
                 console.error(`Error uploading ${file.name}:`, error);
             }
         }
     };
 
-    const handleDeleteFile = (fileName: string) => {
-        setPdfFiles(prevFiles => prevFiles.filter(file => file.name !== fileName));
-        if (pdfFiles.length === 1) {
-            setIsPdfUploaded(false);
+    const handleDeleteFile = async (fileName: string) => {
+        try {
+            const response = await fetch("/api/files/delete", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ fileName }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Failed to delete file");
+            }
+
+            setPdfFiles(prevFiles => prevFiles.filter(file => file.name !== fileName));
+            if (pdfFiles.length === 1) {
+                setIsPdfUploaded(false);
+            }
+        } catch (error) {
+            console.error("Error deleting file:", error);
         }
     };
 
-    const handleSendMessage = (message: string) => {
+    const handleSendMessage = async (message: string) => {
+        if (!message.trim()) return;
+
         const newMessage = {
             sender: "User",
-            message,
-            timestamp: new Date().toLocaleString(),
+            message
         };
         setChatHistory(prevHistory => [...prevHistory, newMessage]);
 
-        const botReply = {
-            sender: "Bot",
-            message: "Bot: " + message,
-            timestamp: new Date().toLocaleString(),
-        };
-        setChatHistory(prevHistory => [...prevHistory, botReply]);
+        try {
+            const response = await fetch("/api/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newMessage),
+            });
+
+            const data = await response.json();
+
+            const botReply = {
+                sender: "Bot",
+                message: data.response
+            };
+
+            setChatHistory(prevHistory => [...prevHistory, botReply]);
+        } catch (error) {
+            console.error("Error fetching bot response:", error);
+            const botErrorReply = {
+                sender: "Bot",
+                message: "Sorry, I couldn't process your request."
+            };
+            setChatHistory(prevHistory => [...prevHistory, botErrorReply]);
+        }
     };
 
     useEffect(() => {
@@ -69,6 +102,24 @@ export default function ChatPage() {
             chatHistoryEndRef.current.scrollTop = chatHistoryEndRef.current.scrollHeight;
         }
     }, [chatHistory]);
+
+    useEffect(() => {
+        const fetchpdfFiles = async () => {
+            try {
+                const response = await fetch('/api/files');
+                if (!response.ok) throw new Error('Failed to fetch PDF files');
+
+                const data = await response.json();
+
+                setPdfFiles(data.files);
+                setIsPdfUploaded(data.files.length > 0);
+            } catch (error) {
+                console.error('Error fetching PDF files:', error);
+            }
+        }
+
+        fetchpdfFiles();
+    }, [])
 
     return (
         <div className="flex flex-col h-screen px-4 bg-gray-100">

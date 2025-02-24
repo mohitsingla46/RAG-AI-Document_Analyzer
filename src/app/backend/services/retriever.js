@@ -1,6 +1,6 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { embeddings } from "@backend/config/embeddings.js";
+import { embeddings } from "@/app/backend/config/embeddings.js";
 import { searchVectorStore } from "./vectorStore.js";
 
 const retrieveSchema = z.object({ query: z.string() });

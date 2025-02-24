@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
-import multer from "multer";
 import { processPDF } from "@/app/backend/services/pdfService";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
-const upload = multer({ dest: "uploads/" });
 
 export const POST = async (req) => {
     try {

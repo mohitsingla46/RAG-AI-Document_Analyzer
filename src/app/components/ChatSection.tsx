@@ -30,13 +30,13 @@ const ChatSection: React.FC<ChatSectionProps> = ({ chatHistory, handleSendMessag
                 {!isPdfUploaded ? (
                     <div className="flex flex-col justify-center items-center text-center p-8">
                         <Typography variant="h6" color="textPrimary">Please upload a PDF document to get started with the chat.</Typography>
-                        <Typography variant="body2" color="textSecondary">You need to upload a document first to be able to chat with the bot.</Typography>
+                        <Typography variant="body2" color="textSecondary">You need to upload a document first to be able to chat with the agent.</Typography>
                     </div>
                 ) : (
                     <div ref={chatHistoryEndRef} className="overflow-y-auto mb-4 flex-grow" style={{ maxHeight: '500px' }}>
                         {/* Displaying Chat History */}
                         {chatHistory.map((chat, index) => (
-                            <div key={index} className={`p-3 mb-2 rounded-lg max-w-[70%] ${chat.sender === 'User' ? 'bg-blue-500 text-white ml-auto' : 'bg-gray-200 text-black mr-auto'}`}>
+                            <div key={index} className={`p-3 mb-2 rounded-lg max-w-[70%] ${chat.sender === 'human' ? 'bg-blue-500 text-white ml-auto' : 'bg-gray-200 text-black mr-auto'}`}>
                                 <Typography variant="body2">{chat.message}</Typography>
                             </div>
                         ))}

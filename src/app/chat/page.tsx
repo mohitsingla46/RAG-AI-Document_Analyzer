@@ -14,25 +14,33 @@ export default function ChatPage() {
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (!files) return;
-
+    
         const newFiles = Array.from(files);
-        setPdfFiles(newFiles);
-        setIsPdfUploaded(true);
-
+        const uploadedFiles: File[] = [];
+    
         for (const file of newFiles) {
             const formData = new FormData();
             formData.append('file', file);
-
+    
             try {
                 const response = await fetch('/api/upload', {
                     method: 'POST',
                     body: formData,
                 });
-
-                if (!response.ok) throw new Error('Upload failed');
+    
+                if (!response.ok) {
+                    throw new Error(`Upload failed for ${file.name}`);
+                }
+    
+                uploadedFiles.push(file);
             } catch (error) {
                 console.error(`Error uploading ${file.name}:`, error);
             }
+        }
+
+        if (uploadedFiles.length > 0) {
+            setPdfFiles(uploadedFiles);
+            setIsPdfUploaded(true);
         }
     };
 
@@ -65,7 +73,7 @@ export default function ChatPage() {
         if (!message.trim()) return;
 
         const newMessage = {
-            sender: "User",
+            sender: "human",
             message
         };
         setChatHistory(prevHistory => [...prevHistory, newMessage]);
@@ -81,19 +89,19 @@ export default function ChatPage() {
 
             const data = await response.json();
 
-            const botReply = {
-                sender: "Bot",
+            const agentReply = {
+                sender: "agent",
                 message: data.response
             };
 
-            setChatHistory(prevHistory => [...prevHistory, botReply]);
+            setChatHistory(prevHistory => [...prevHistory, agentReply]);
         } catch (error) {
-            console.error("Error fetching bot response:", error);
-            const botErrorReply = {
-                sender: "Bot",
+            console.error("Error fetching agent response:", error);
+            const agentErrorReply = {
+                sender: "agent",
                 message: "Sorry, I couldn't process your request."
             };
-            setChatHistory(prevHistory => [...prevHistory, botErrorReply]);
+            setChatHistory(prevHistory => [...prevHistory, agentErrorReply]);
         }
     };
 
@@ -120,6 +128,25 @@ export default function ChatPage() {
 
         fetchpdfFiles();
     }, [])
+
+    useEffect(() => {
+        const fetchChatHistory = async () => {
+            try {
+                const response = await fetch("/api/chat?threadId=default-thread", {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include"
+                });
+                if (!response.ok) throw new Error("Failed to fetch chat history");
+                const data = await response.json();
+                setChatHistory(data.chatHistory);
+            } catch (error) {
+                console.error("Error:", error);
+            } finally {
+            }
+        };
+        fetchChatHistory();
+    }, []);
 
     return (
         <div className="flex flex-col h-screen px-4 bg-gray-100">

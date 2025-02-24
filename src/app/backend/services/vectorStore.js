@@ -5,6 +5,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const VECTOR_COLLECTION = "pdf_vectors";
 const FILE_COLLECTION = "pdf_files";
+const CHAT_COLLECTION = "chat_history";
 
 export const saveToVectorStore = async (splitDocs, source, userId) => {
     const client = await clientPromise;
@@ -132,3 +133,35 @@ export const deletePDF = async (userId) => {
         throw new Error("Failed to delete PDF.");
     }
 }
+
+export const saveChatMessage = async (userId, threadId, role, content) => {
+    const client = await clientPromise;
+    const db = client.db();
+    const collection = db.collection(CHAT_COLLECTION);
+    const timestamp = new Date().toISOString();
+
+    await collection.insertOne({
+        userId,
+        threadId,
+        role,
+        content,
+        timestamp
+    });
+}
+
+export const getChatHistory = async (userId, threadId) => {
+    const client = await clientPromise;
+    const db = client.db();
+    const collection = db.collection(CHAT_COLLECTION);
+
+    const messages = await collection
+        .find({ userId, threadId })
+        .sort({ timestamp: 1 })
+        .toArray();
+
+    return messages.map(msg => ({
+        sender: msg.role,
+        message: msg.content,
+        timestamp: msg.timestamp
+    }));
+};

@@ -12,7 +12,7 @@ export const DELETE = async () => {
         }
 
         const userId = session.user.id;
-        await deletePDF(userId);
+        await deletePDF(userId, true);
 
         return NextResponse.json({ success: true, message: "File deleted successfully" });
     } catch (error) {

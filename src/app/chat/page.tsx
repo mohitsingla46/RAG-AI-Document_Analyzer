@@ -14,24 +14,24 @@ export default function ChatPage() {
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (!files) return;
-    
+
         const newFiles = Array.from(files);
         const uploadedFiles: File[] = [];
-    
+
         for (const file of newFiles) {
             const formData = new FormData();
             formData.append('file', file);
-    
+
             try {
                 const response = await fetch('/api/upload', {
                     method: 'POST',
                     body: formData,
                 });
-    
+
                 if (!response.ok) {
                     throw new Error(`Upload failed for ${file.name}`);
                 }
-    
+
                 uploadedFiles.push(file);
             } catch (error) {
                 console.error(`Error uploading ${file.name}:`, error);
@@ -53,13 +53,13 @@ export default function ChatPage() {
                 },
                 body: JSON.stringify({ fileName }),
             });
-    
+
             const data = await response.json();
-    
+
             if (!response.ok) {
                 throw new Error(data.error || "Failed to delete file");
             }
-    
+
             setPdfFiles(prevFiles => {
                 const updatedFiles = prevFiles.filter(file => file.name !== fileName);
                 if (updatedFiles.length === 0) {
@@ -68,6 +68,8 @@ export default function ChatPage() {
                 }
                 return updatedFiles;
             });
+
+            setChatHistory([]);
         } catch (error) {
             console.error("Error deleting file:", error);
         }

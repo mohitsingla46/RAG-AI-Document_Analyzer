@@ -117,17 +117,21 @@ export const fetchUserPDFs = async (userId) => {
     }
 };
 
-export const deletePDF = async (userId) => {
+export const deletePDF = async (userId, deleteChat = true) => {
     const client = await clientPromise;
     const db = client.db();
     const vectorCollection = db.collection(VECTOR_COLLECTION);
     const fileCollection = db.collection(FILE_COLLECTION);
 
     try {
-        await vectorCollection
-            .deleteMany({ userId });
-        return await fileCollection
-            .deleteMany({ userId });
+        await vectorCollection.deleteMany({ userId });
+        const fileDeleteResult = await fileCollection.deleteMany({ userId });
+
+        if (deleteChat) {
+            await deleteChatHistory(userId);
+        }
+
+        return fileDeleteResult;
     } catch (error) {
         console.error("Error deleting PDF:", error);
         throw new Error("Failed to delete PDF.");
@@ -164,4 +168,18 @@ export const getChatHistory = async (userId, threadId) => {
         message: msg.content,
         timestamp: msg.timestamp
     }));
+};
+
+export const deleteChatHistory = async (userId, threadId = null) => {
+    const client = await clientPromise;
+    const db = client.db();
+    const collection = db.collection(CHAT_COLLECTION);
+
+    const query = { userId };
+    if (threadId) {
+        query.threadId = threadId;
+    }
+
+    const result = await collection.deleteMany(query);
+    return result;
 };

@@ -53,17 +53,21 @@ export default function ChatPage() {
                 },
                 body: JSON.stringify({ fileName }),
             });
-
+    
             const data = await response.json();
-
+    
             if (!response.ok) {
                 throw new Error(data.error || "Failed to delete file");
             }
-
-            setPdfFiles(prevFiles => prevFiles.filter(file => file.name !== fileName));
-            if (pdfFiles.length === 1) {
-                setIsPdfUploaded(false);
-            }
+    
+            setPdfFiles(prevFiles => {
+                const updatedFiles = prevFiles.filter(file => file.name !== fileName);
+                if (updatedFiles.length === 0) {
+                    setPdfFiles([]); // Explicitly clear
+                    setIsPdfUploaded(false);
+                }
+                return updatedFiles;
+            });
         } catch (error) {
             console.error("Error deleting file:", error);
         }

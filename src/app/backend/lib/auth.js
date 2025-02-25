@@ -1,5 +1,5 @@
 import GoogleProvider from "next-auth/providers/google";
-import { getMongoDBAdapter } from "./../lib/nextAuthMongo";
+import { getMongoDBAdapter } from "@/app/lib/nextAuthMongo";
 
 export const authOptions = {
     providers: [

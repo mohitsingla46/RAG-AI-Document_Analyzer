@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { graphWithMemory } from "@/app/backend/graph/graph";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/backend/lib/auth";
 import { getChatHistory, saveChatMessage } from "@/app/backend/services/vectorStore";
 
 export const POST = async (req) => {

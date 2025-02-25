@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { processPDF } from "@/app/backend/services/pdfService";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/backend/lib/auth";
 
 export const POST = async (req) => {
     try {

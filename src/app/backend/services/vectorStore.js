@@ -1,7 +1,7 @@
 import clientPromise from "@/app/lib/mongodb";
 import { embeddings } from "@/app/backend/config/embeddings.js";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/backend/lib/auth";
 
 const VECTOR_COLLECTION = "pdf_vectors";
 const FILE_COLLECTION = "pdf_files";

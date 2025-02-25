@@ -12,6 +12,7 @@ export default function Home() {
 		try {
 			await signIn('google');
 		} catch (error) {
+			console.error('Failed to sign in', error);
 			setLoading(false);
 		}
 	};

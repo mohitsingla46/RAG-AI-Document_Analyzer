@@ -68,7 +68,7 @@ export const saveToVectorStore = async (splitDocs, source, userId) => {
     }
 };
 
-export const searchVectorStore = async (queryEmbedding, limit = 2) => {
+export const searchVectorStore = async (queryEmbedding) => {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

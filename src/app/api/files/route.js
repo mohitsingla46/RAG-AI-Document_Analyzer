@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { fetchUserPDFs } from "@/app/backend/services/vectorStore.js";
 
-export const GET = async (req) => {
+export const GET = async () => {
     try {
         const session = await getServerSession(authOptions);
 

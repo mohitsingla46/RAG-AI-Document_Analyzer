@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { deletePDF } from "@/app/backend/services/vectorStore.js";
 
-export const DELETE = async (req) => {
+export const DELETE = async () => {
     try {
         const session = await getServerSession(authOptions);
 

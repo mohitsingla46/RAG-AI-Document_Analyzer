@@ -3,13 +3,17 @@ import { useState, useEffect, useRef } from 'react';
 import DocumentUploadSection from '@/app/components/DocumentUploadSection';
 import ChatSection from '@/app/components/ChatSection';
 import Header from '@/app/components/Header';
+import { useSession } from 'next-auth/react';
 
 export default function ChatPage() {
+    const { data: session, status } = useSession()
     const chatHistoryEndRef = useRef<HTMLDivElement>(null);
 
     const [pdfFiles, setPdfFiles] = useState<File[]>([]);
     const [chatHistory, setChatHistory] = useState<{ sender: string; message: string; }[]>([]);
     const [isPdfUploaded, setIsPdfUploaded] = useState(false);
+
+    const userId = (session?.user as { id?: string })?.id;
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -90,7 +94,7 @@ export default function ChatPage() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(newMessage),
+                body: JSON.stringify({ message, threadId: `${userId}-default` }),
             });
 
             const data = await response.json();
@@ -138,7 +142,7 @@ export default function ChatPage() {
     useEffect(() => {
         const fetchChatHistory = async () => {
             try {
-                const response = await fetch("/api/chat?threadId=default-thread", {
+                const response = await fetch(`/api/chat?threadId=${userId}-default`, {
                     method: "GET",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include"
@@ -152,7 +156,7 @@ export default function ChatPage() {
             }
         };
         fetchChatHistory();
-    }, []);
+    }, [userId, status]);
 
     return (
         <div className="flex flex-col h-screen px-4 bg-gray-100">

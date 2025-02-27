@@ -6,6 +6,8 @@ import { authOptions } from "@/app/backend/lib/auth";
 const VECTOR_COLLECTION = "pdf_vectors";
 const FILE_COLLECTION = "pdf_files";
 const CHAT_COLLECTION = "chat_history";
+const CHECKPOINT_COLLECTION = "checkpoints";
+const CHECKPOINT_WRITES_COLLECTION = "checkpoint_writes";
 
 export const saveToVectorStore = async (splitDocs, source, userId) => {
     const client = await clientPromise;
@@ -14,16 +16,14 @@ export const saveToVectorStore = async (splitDocs, source, userId) => {
     const fileCollection = db.collection(FILE_COLLECTION);
 
     try {
-        const vectorDeleteResult = await vectorCollection.deleteMany({ userId });
-        const fileDeleteResult = await fileCollection.deleteMany({ userId });
-        console.log(`Deleted ${vectorDeleteResult.deletedCount} vectors and ${fileDeleteResult.deletedCount} file records`);
+        await vectorCollection.deleteMany({ userId });
+        await fileCollection.deleteMany({ userId });
 
         await fileCollection.insertOne({
             userId,
             source,
             uploadedAt: new Date()
         });
-        console.log(`Saved file record for ${source}`);
 
         const vectors = await Promise.all(
             splitDocs.map(async (doc) => {
@@ -57,10 +57,8 @@ export const saveToVectorStore = async (splitDocs, source, userId) => {
         for (let i = 0; i < validVectors.length; i += BATCH_SIZE) {
             const batch = validVectors.slice(i, i + BATCH_SIZE);
             await vectorCollection.insertMany(batch);
-            console.log(`Inserted batch of ${batch.length} vectors`);
         }
 
-        console.log(`Saved ${validVectors.length} vectors`);
         return validVectors.length;
     } catch (error) {
         console.error("Error saving to vector store:", error);
@@ -93,7 +91,6 @@ export const searchVectorStore = async (queryEmbedding) => {
             { $match: { userId } }
         ]).toArray();
 
-        console.log(`Found ${results.length} results for userId: ${userId}`);
         return results;
     } catch (error) {
         console.error("Vector search error:", error);
@@ -129,6 +126,7 @@ export const deletePDF = async (userId, deleteChat = true) => {
 
         if (deleteChat) {
             await deleteChatHistory(userId);
+            await deleteCheckpoint(userId);
         }
 
         return fileDeleteResult;
@@ -181,5 +179,20 @@ export const deleteChatHistory = async (userId, threadId = null) => {
     }
 
     const result = await collection.deleteMany(query);
+    return result;
+};
+
+export const deleteCheckpoint = async (userId) => {
+    const client = await clientPromise;
+    const db = client.db();
+    const collection = db.collection(CHECKPOINT_COLLECTION);
+    const collection1 = db.collection(CHECKPOINT_WRITES_COLLECTION);
+
+    const query = {
+        thread_id: `${userId}-default`
+    };
+
+    await collection.deleteMany(query);
+    const result = await collection1.deleteMany(query);
     return result;
 };

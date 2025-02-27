@@ -1,8 +1,10 @@
-import { MemorySaver, MessagesAnnotation, StateGraph } from "@langchain/langgraph";
+import { MessagesAnnotation, StateGraph } from "@langchain/langgraph";
 import { ToolNode, toolsCondition } from "@langchain/langgraph/prebuilt";
 import { llm } from "@/app/backend/config/llm.js";
 import { retrieve } from "@/app/backend/services/retriever.js";
 import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from "@langchain/core/messages";
+import { MongoDBSaver } from "@langchain/langgraph-checkpoint-mongodb";
+import clientPromise from "@/app/lib/mongodb";
 
 async function queryOrRespond(state) {
     const llmWithTools = llm.bindTools([retrieve]);
@@ -38,7 +40,7 @@ async function generate(state) {
         (message) =>
             message instanceof HumanMessage ||
             message instanceof SystemMessage ||
-            (message instanceof AIMessage && message.tool_calls.length == 0)
+            (message instanceof AIMessage && message.tool_calls.length === 0)
     );
     const prompt = [
         new SystemMessage(systemMessageContent),
@@ -61,5 +63,6 @@ const graphBuilder = new StateGraph(MessagesAnnotation)
     .addEdge("tools", "generate")
     .addEdge("generate", "__end__");
 
-const checkpointer = new MemorySaver();
+const client = await clientPromise;
+const checkpointer = new MongoDBSaver({ client });
 export const graphWithMemory = graphBuilder.compile({ checkpointer });

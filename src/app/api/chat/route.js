@@ -3,11 +3,11 @@ import { graphWithMemory } from "@/app/backend/graph/graph";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/backend/lib/auth";
 import { getChatHistory, saveChatMessage } from "@/app/backend/services/vectorStore";
+import { HumanMessage } from "@langchain/core/messages";
 
 export const POST = async (req) => {
     try {
         const session = await getServerSession(authOptions);
-
         if (!session || !session.user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -20,12 +20,21 @@ export const POST = async (req) => {
 
         await saveChatMessage(userId, threadId, "human", message);
 
-        const inputs = { messages: message };
+        const inputs = { messages: [new HumanMessage({ content: message })] };
         const threadConfig = { configurable: { thread_id: threadId }, streamMode: "values" };
 
         let responseMessage = "";
-        for await (const step of await graphWithMemory.stream(inputs, threadConfig)) {
+
+        const stream = await graphWithMemory.stream(inputs, threadConfig);
+
+        for await (const step of stream) {
+            if (!step.messages || !Array.isArray(step.messages) || step.messages.length === 0) {
+                continue;
+            }
             const lastMessage = step.messages[step.messages.length - 1];
+            if (!lastMessage || typeof lastMessage.content !== "string") {
+                continue;
+            }
             responseMessage = lastMessage.content;
         }
 
@@ -33,7 +42,7 @@ export const POST = async (req) => {
 
         return NextResponse.json({ response: responseMessage });
     } catch (error) {
-        console.error("Error processing messages:", error);
+        console.error("❌ Error processing messages:", error.stack); // Include stack trace
         return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
     }
 };

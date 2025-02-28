@@ -1,4 +1,4 @@
-import { TextField, IconButton, Typography, Card, CardContent } from '@mui/material';
+import { TextField, IconButton, Typography, Card, CardContent, CircularProgress } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { useState } from 'react';
 
@@ -7,9 +7,10 @@ interface ChatSectionProps {
     handleSendMessage: (message: string) => void;
     isPdfUploaded: boolean;
     chatHistoryEndRef: React.RefObject<HTMLDivElement | null>;
+    sending: boolean;
 }
 
-const ChatSection: React.FC<ChatSectionProps> = ({ chatHistory, handleSendMessage, isPdfUploaded, chatHistoryEndRef }) => {
+const ChatSection: React.FC<ChatSectionProps> = ({ chatHistory, handleSendMessage, isPdfUploaded, chatHistoryEndRef, sending }) => {
     const [message, setMessage] = useState("");
 
     const sendMessage = () => {
@@ -19,60 +20,73 @@ const ChatSection: React.FC<ChatSectionProps> = ({ chatHistory, handleSendMessag
     };
 
     return (
-        <Card sx={{ width: '70%' }}>
-            <CardContent className="flex flex-col h-full">
-                {/* Render Chat History title only if PDF is uploaded */}
+        <Card className="w-[70%] bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardContent className="flex flex-col h-full p-6">
                 {isPdfUploaded && (
-                    <Typography variant="h6" gutterBottom>Chat History</Typography>
+                    <Typography variant="h5" className="text-[#1f2937] font-semibold mb-4">Chat History</Typography>
                 )}
 
-                {/* Display message to upload a PDF if not uploaded yet */}
                 {!isPdfUploaded ? (
-                    <div className="flex flex-col justify-center items-center text-center p-8">
-                        <Typography variant="h6" color="textPrimary">Please upload a PDF document to get started with the chat.</Typography>
-                        <Typography variant="body2" color="textSecondary">You need to upload a document first to be able to chat with the agent.</Typography>
+                    <div className="flex flex-col justify-center items-center text-center p-8 bg-gray-50 rounded-lg">
+                        <Typography variant="h6" className="text-[#1f2937] font-medium">Upload a PDF to Start Chatting</Typography>
+                        <Typography variant="body2" className="text-[#6b7280] mt-2">Add a document to begin your conversation with the agent.</Typography>
                     </div>
                 ) : (
-                    <div ref={chatHistoryEndRef} className="overflow-y-auto mb-4 flex-grow" style={{ maxHeight: '500px' }}>
-                        {/* Displaying Chat History */}
+                    <div ref={chatHistoryEndRef} className="overflow-y-auto mb-6 flex-grow" style={{ maxHeight: '500px' }}>
                         {chatHistory.map((chat, index) => (
-                            <div key={index} className={`p-3 mb-2 rounded-lg max-w-[70%] ${chat.sender === 'human' ? 'bg-blue-500 text-white ml-auto' : 'bg-gray-200 text-black mr-auto'}`}>
-                                <Typography variant="body2">{chat.message}</Typography>
+                            <div
+                                key={index}
+                                className={`p-4 mb-3 rounded-xl max-w-[70%] shadow-sm transition-all duration-200 ${
+                                    chat.sender === 'human'
+                                        ? 'bg-gradient-to-r from-[#4f46e5] to-[#7c3aed] text-white ml-auto'
+                                        : 'bg-gray-100 text-[#1f2937] mr-auto'
+                                }`}
+                            >
+                                <Typography variant="body2" className="leading-relaxed">{chat.message}</Typography>
                             </div>
                         ))}
+                        {sending && (
+                            <div className="p-4 mb-3 rounded-xl max-w-[70%] bg-gray-100 text-[#1f2937] mr-auto flex items-center space-x-3 animate-pulse">
+                                <CircularProgress size={20} className="text-[#4f46e5]" />
+                                <Typography variant="body2" className="text-[#6b7280] font-medium">Thinking...</Typography>
+                            </div>
+                        )}
                     </div>
                 )}
 
-                {/* Input box and send button at the bottom */}
                 {isPdfUploaded && (
-                    <div className="flex items-center space-x-2 mt-auto">
+                    <div className="flex items-center space-x-3 mt-auto">
                         <TextField
                             fullWidth
                             variant="outlined"
-                            placeholder="Type your message here..."
+                            placeholder="Type your message..."
                             size="small"
                             sx={{
-                                borderRadius: '10px',
-                                backgroundColor: '#f4f6f8',
+                                borderRadius: '12px',
+                                background: 'linear-gradient(to right, #f9fafb, #eef2ff)',
                                 '& .MuiOutlinedInput-root': {
-                                    borderRadius: '10px',
-                                }
+                                    borderRadius: '12px',
+                                    '& fieldset': { borderColor: '#d1d5db' },
+                                    '&:hover fieldset': { borderColor: '#60a5fa' },
+                                    '&.Mui-focused fieldset': { borderColor: '#4f46e5' },
+                                },
                             }}
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") sendMessage();
                             }}
+                            autoComplete="off"
+                            className="shadow-sm"
                         />
                         <IconButton
-                            color="primary"
                             sx={{
-                                padding: '8px 16px',
-                                backgroundColor: '#1976d2',
+                                padding: '10px',
+                                background: 'linear-gradient(to right, #4f46e5, #7c3aed)',
                                 color: 'white',
-                                borderRadius: '10px', // Rounded corners for better alignment
-                                border: '1px solid #1976d2',
-                                '&:hover': { backgroundColor: '#1565c0' },
+                                borderRadius: '12px',
+                                boxShadow: '0 2px 10px rgba(79, 70, 229, 0.3)',
+                                '&:hover': { background: 'linear-gradient(to right, #4338ca, #6d28d9)' },
                             }}
                             onClick={sendMessage}
                         >
@@ -83,6 +97,6 @@ const ChatSection: React.FC<ChatSectionProps> = ({ chatHistory, handleSendMessag
             </CardContent>
         </Card>
     );
-}
+};
 
 export default ChatSection;

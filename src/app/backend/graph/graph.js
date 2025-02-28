@@ -7,8 +7,50 @@ import { MongoDBSaver } from "@langchain/langgraph-checkpoint-mongodb";
 import clientPromise from "@/app/lib/mongodb";
 
 async function queryOrRespond(state) {
+    const systemMessageContent = new SystemMessage(
+        "You are an assistant for question-answering tasks. When the conversation is new, you should respond with a greeting message and ask the user how you can help them. If the answer can be found in the existing conversation, answer directly. Otherwise, request information from the tool. If a tool call is requested, format your answer as a tool call, without additional text."
+    );
+    const conversationMessages = state.messages.filter(
+        (message) =>
+            message instanceof HumanMessage ||
+            (message instanceof SystemMessage) ||
+            (message instanceof AIMessage && message.tool_calls === undefined)
+    );
+    const messages = [
+        systemMessageContent,
+        ...conversationMessages
+    ]
     const llmWithTools = llm.bindTools([retrieve]);
-    const response = await llmWithTools.invoke(state.messages);
+    const response = await llmWithTools.invoke(messages);
+
+    // Attempt to parse the LLM's output if it's a string
+    if (typeof response.content === 'string') {
+        const toolCallMatch = response.content.match(/<function=([^ ]+) ({.*?}) <\/function>/);
+        if (toolCallMatch) {
+            const toolName = toolCallMatch[1];
+            const toolInput = toolCallMatch[2];
+
+            if (toolName === 'retrieve') {
+                try {
+                    const parsedInput = JSON.parse(toolInput);
+                    const toolCall = {
+                        id: '1',
+                        function: { name: toolName, arguments: JSON.stringify(parsedInput) },
+                        type: 'function'
+                    }
+                    const repairedResponse = new AIMessage({
+                        content: '',
+                        tool_calls: [toolCall],
+                    });
+                    console.log("Repaired tool call:", repairedResponse);
+                    return { messages: [repairedResponse] };
+                } catch (error) {
+                    console.error("Failed to parse tool input", error);
+                }
+            }
+        }
+    }
+
     return { messages: [response] };
 }
 
@@ -40,7 +82,7 @@ async function generate(state) {
         (message) =>
             message instanceof HumanMessage ||
             message instanceof SystemMessage ||
-            (message instanceof AIMessage && message.tool_calls.length === 0)
+            (message instanceof AIMessage && message.tool_calls?.length === 0)
     );
     const prompt = [
         new SystemMessage(systemMessageContent),

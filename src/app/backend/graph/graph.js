@@ -7,7 +7,6 @@ import { MongoDBSaver } from "@langchain/langgraph-checkpoint-mongodb";
 import clientPromise from "@/app/lib/mongodb";
 
 const toolsCondition = (state) => {
-    console.log("toolsCondition state:", state);
     const lastMessage = state.messages[state.messages.length - 1];
 
     // Ensure the tool gets executed when a tool call exists
@@ -22,8 +21,7 @@ async function queryOrRespond(state) {
         "You are an assistant for question-answering tasks. " +
         "When the conversation is new, greet the user and ask how you can help. " +
         "If the answer is in the conversation history, answer directly. " +
-        "Otherwise, call the tool without additional text. " +
-        "You must use JSON format for tool calls."
+        "Otherwise, use the 'retrieve' tool properly in JSON format."
     );
 
     const conversationMessages = state.messages.filter(
@@ -35,19 +33,36 @@ async function queryOrRespond(state) {
 
     const messages = [systemMessageContent, ...conversationMessages];
 
-    // Enforce tool usage & JSON response
-    const llmWithTools = llm.bindTools([retrieve], {
+    let llmWithTools = llm.bindTools([retrieve], {
         enforceToolUsage: true,
-        responseFormat: "json", // Force structured JSON output
+        responseFormat: "json",
     });
 
-    const response = await llmWithTools.invoke(messages);
+    let response = await llmWithTools.invoke(messages);
 
-    console.log("LLM Response:", response);
+    // 🛠 Fix: Ensure JSON Tool Calls Instead of Raw String
+    if (
+        typeof response.content === 'string' && 
+        response.content.includes("<function=") // ❌ Invalid Format Check
+    ) {
+        console.warn("⚠️ Raw function call detected. Retrying with enforced JSON...");
 
-    // Ensure response is structured properly
+        llmWithTools = llm.bindTools([retrieve], {
+            enforceToolUsage: true,
+            responseFormat: "json",
+        });
+
+        response = await llmWithTools.invoke(messages);
+
+        // Still not JSON? Throw an error
+        if (typeof response.content === 'string' && response.content.includes("<function=")) {
+            console.error("❌ LLM is still returning raw function call! Fix needed.");
+            throw new Error("LLM did not return JSON tool calls. Check prompt enforcement.");
+        }
+    }
+
     if (!(response instanceof AIMessage)) {
-        console.error("Unexpected LLM response format:", response);
+        console.error("❌ Unexpected LLM response format:", response);
         throw new Error("LLM did not return a valid AIMessage object.");
     }
 

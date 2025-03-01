@@ -8,6 +8,7 @@ import clientPromise from "@/app/lib/mongodb";
 
 const toolsCondition = (state) => {
     const lastMessage = state.messages[state.messages.length - 1];
+    console.log(lastMessage);
 
     if (lastMessage.tool_calls?.length > 0) {
         return "tools";
@@ -29,12 +30,15 @@ async function queryOrRespond(state) {
             msg instanceof SystemMessage ||
             (msg instanceof AIMessage && !msg.tool_calls)
     );
+    console.log(conversationMessages);
 
     const messages = [systemMessageContent, ...conversationMessages];
+    console.log(messages);
 
     // Force tool usage when required
     const llmWithTools = llm.bindTools([retrieve], { enforceToolUsage: true });
     const response = await llmWithTools.invoke(messages);
+    console.log(response);
 
     return { messages: [response] };
 }

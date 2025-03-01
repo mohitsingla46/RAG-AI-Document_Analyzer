@@ -1,55 +1,40 @@
 import { MessagesAnnotation, StateGraph } from "@langchain/langgraph";
-import { ToolNode, toolsCondition } from "@langchain/langgraph/prebuilt";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { llm } from "@/app/backend/config/llm.js";
 import { retrieve } from "@/app/backend/services/retriever.js";
 import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from "@langchain/core/messages";
 import { MongoDBSaver } from "@langchain/langgraph-checkpoint-mongodb";
 import clientPromise from "@/app/lib/mongodb";
 
+const toolsCondition = (state) => {
+    const lastMessage = state.messages[state.messages.length - 1];
+
+    if (lastMessage.tool_calls?.length > 0) {
+        return "tools";
+    }
+    return "__end__";
+};
+
 async function queryOrRespond(state) {
     const systemMessageContent = new SystemMessage(
-        "You are an assistant for question-answering tasks. When the conversation is new, you should respond with a greeting message and ask the user how you can help them. If the answer can be found in the existing conversation, answer directly. Otherwise, request information from the tool. If a tool call is requested, format your answer as a tool call, without additional text."
+        "You are an assistant for question-answering tasks. " +
+        "When the conversation is new, greet the user and ask how you can help. " +
+        "If the answer is in the conversation history, answer directly. " +
+        "Otherwise, call the tool without additional text."
     );
+
     const conversationMessages = state.messages.filter(
-        (message) =>
-            message instanceof HumanMessage ||
-            (message instanceof SystemMessage) ||
-            (message instanceof AIMessage && message.tool_calls === undefined)
+        (msg) =>
+            msg instanceof HumanMessage ||
+            msg instanceof SystemMessage ||
+            (msg instanceof AIMessage && !msg.tool_calls)
     );
-    const messages = [
-        systemMessageContent,
-        ...conversationMessages
-    ]
-    const llmWithTools = llm.bindTools([retrieve]);
+
+    const messages = [systemMessageContent, ...conversationMessages];
+
+    // Force tool usage when required
+    const llmWithTools = llm.bindTools([retrieve], { enforceToolUsage: true });
     const response = await llmWithTools.invoke(messages);
-
-    // Attempt to parse the LLM's output if it's a string
-    if (typeof response.content === 'string') {
-        const toolCallMatch = response.content.match(/<function=([^ ]+) ({.*?}) <\/function>/);
-        if (toolCallMatch) {
-            const toolName = toolCallMatch[1];
-            const toolInput = toolCallMatch[2];
-
-            if (toolName === 'retrieve') {
-                try {
-                    const parsedInput = JSON.parse(toolInput);
-                    const toolCall = {
-                        id: '1',
-                        function: { name: toolName, arguments: JSON.stringify(parsedInput) },
-                        type: 'function'
-                    }
-                    const repairedResponse = new AIMessage({
-                        content: '',
-                        tool_calls: [toolCall],
-                    });
-                    console.log("Repaired tool call:", repairedResponse);
-                    return { messages: [repairedResponse] };
-                } catch (error) {
-                    console.error("Failed to parse tool input", error);
-                }
-            }
-        }
-    }
 
     return { messages: [response] };
 }
@@ -95,7 +80,7 @@ async function generate(state) {
 
 const graphBuilder = new StateGraph(MessagesAnnotation)
     .addNode("queryOrRespond", queryOrRespond)
-    .addNode("tools", tools)
+    .addNode("tools", new ToolNode([retrieve]))
     .addNode("generate", generate)
     .addEdge("__start__", "queryOrRespond")
     .addConditionalEdges("queryOrRespond", toolsCondition, {

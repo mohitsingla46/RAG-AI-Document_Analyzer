@@ -18,10 +18,11 @@ const toolsCondition = (state) => {
 
 async function queryOrRespond(state) {
     const systemMessageContent = new SystemMessage(
-        "You are an assistant for question-answering tasks. " +
-        "When the conversation is new, greet the user and ask how you can help. " +
-        "If the answer is in the conversation history, answer directly. " +
-        "Otherwise, use the 'retrieve' tool properly in JSON format."
+        "You are a highly capable AI assistant specialized in question-answering tasks. " +
+        "When a conversation starts, greet the user and ask how you can help. " +
+        "If the answer is available in previous messages, respond directly and concisely. " +
+        "If external retrieval is needed, request data using a structured JSON format. " +
+        "Respond in a clear and helpful manner, avoiding unnecessary repetition."
     );
 
     const conversationMessages = state.messages.filter(
@@ -42,7 +43,7 @@ async function queryOrRespond(state) {
 
     // 🛠 Fix: Ensure JSON Tool Calls Instead of Raw String
     if (
-        typeof response.content === 'string' && 
+        typeof response.content === 'string' &&
         response.content.includes("<function=") // ❌ Invalid Format Check
     ) {
         console.warn("⚠️ Raw function call detected. Retrying with enforced JSON...");
@@ -83,11 +84,10 @@ async function generate(state) {
 
     const docsContent = toolMessages.map((doc) => doc.content).join("\n");
     const systemMessageContent =
-        "You are an assistant for question-answering tasks. " +
-        "Use the following pieces of retrieved context to answer " +
-        "the question. If you don't know the answer, say that you " +
-        "don't know. Use three sentences maximum and keep the " +
-        "answer concise." +
+        "You are an AI assistant specialized in answering questions using retrieved information. " +
+        "Use ONLY the provided context below to answer. Do NOT use outside knowledge. " +
+        "If the answer is not in the context, say 'I don't know' instead of making something up. " +
+        "Keep responses concise and to the point." +
         "\n\n" +
         `${docsContent}`;
 

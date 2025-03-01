@@ -7,9 +7,10 @@ import { MongoDBSaver } from "@langchain/langgraph-checkpoint-mongodb";
 import clientPromise from "@/app/lib/mongodb";
 
 const toolsCondition = (state) => {
+    console.log("toolsCondition state:", state);
     const lastMessage = state.messages[state.messages.length - 1];
-    console.log(lastMessage);
 
+    // Ensure the tool gets executed when a tool call exists
     if (lastMessage.tool_calls?.length > 0) {
         return "tools";
     }
@@ -21,7 +22,8 @@ async function queryOrRespond(state) {
         "You are an assistant for question-answering tasks. " +
         "When the conversation is new, greet the user and ask how you can help. " +
         "If the answer is in the conversation history, answer directly. " +
-        "Otherwise, call the tool without additional text."
+        "Otherwise, call the tool without additional text. " +
+        "You must use JSON format for tool calls."
     );
 
     const conversationMessages = state.messages.filter(
@@ -30,15 +32,24 @@ async function queryOrRespond(state) {
             msg instanceof SystemMessage ||
             (msg instanceof AIMessage && !msg.tool_calls)
     );
-    console.log(conversationMessages);
 
     const messages = [systemMessageContent, ...conversationMessages];
-    console.log(messages);
 
-    // Force tool usage when required
-    const llmWithTools = llm.bindTools([retrieve], { enforceToolUsage: true });
+    // Enforce tool usage & JSON response
+    const llmWithTools = llm.bindTools([retrieve], {
+        enforceToolUsage: true,
+        responseFormat: "json", // Force structured JSON output
+    });
+
     const response = await llmWithTools.invoke(messages);
-    console.log(response);
+
+    console.log("LLM Response:", response);
+
+    // Ensure response is structured properly
+    if (!(response instanceof AIMessage)) {
+        console.error("Unexpected LLM response format:", response);
+        throw new Error("LLM did not return a valid AIMessage object.");
+    }
 
     return { messages: [response] };
 }

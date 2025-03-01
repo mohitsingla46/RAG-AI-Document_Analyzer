@@ -19,7 +19,7 @@ const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({ pdfFiles,
     return (
         <Card className="w-[30%] bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardContent className="p-6">
-                <Typography variant="h5" className="text-[#1f2937] font-semibold mb-4">Upload PDFs</Typography>
+                <Typography variant="h6" className="text-[#1f2937] font-semibold mb-4">Upload PDF</Typography>
                 <Button
                     variant="contained"
                     component="label"
@@ -33,13 +33,13 @@ const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({ pdfFiles,
                             <span>Processing...</span>
                         </div>
                     ) : (
-                        "Choose Files"
+                        "Choose File"
                     )}
-                    <input type="file" accept="application/pdf" hidden onChange={handleFileChange} multiple />
+                    <input type="file" accept="application/pdf" hidden onChange={handleFileChange} />
                 </Button>
             </CardContent>
             <CardActions className="px-6">
-                <Typography variant="body2" className="text-[#6b7280] font-medium flex-1">Uploaded Documents</Typography>
+                <Typography variant="body2" className="text-[#6b7280] font-medium flex-1">Uploaded Document</Typography>
             </CardActions>
             <CardContent className="p-6">
                 <List>
@@ -71,7 +71,7 @@ const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({ pdfFiles,
                             );
                         })
                     ) : (
-                        <Typography variant="body2" className="text-[#6b7280] italic">No PDFs uploaded yet.</Typography>
+                        <Typography variant="body2" className="text-[#6b7280] italic">No PDF uploaded yet.</Typography>
                     )}
                 </List>
             </CardContent>

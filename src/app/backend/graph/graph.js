@@ -39,8 +39,6 @@ async function queryOrRespond(state) {
     return { messages: [response] };
 }
 
-const tools = new ToolNode([retrieve]);
-
 async function generate(state) {
     let recentToolMessages = [];
     for (let i = state["messages"].length - 1; i >= 0; i--) {

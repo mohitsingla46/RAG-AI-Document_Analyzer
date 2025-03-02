@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI PDF Analyzer
+
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://your-build-status-url.com)
+
+**Chat with your PDFs!** This project provides a user-friendly application that lets you ask questions about your PDF documents and get AI-powered answers.
+
+## Overview
+
+The AI PDF Analyzer is a full-stack application that utilizes the power of Large Language Models (LLMs), vector databases, and document retrieval to allow you to interact with your PDF content in a conversational way.  Whether you need to extract specific information, summarize key points, or understand complex data, this tool can help.
+
+## Key Features
+
+*   **Conversational Interaction:** Ask questions about your PDF and receive natural language responses.
+*   **AI-Powered Insights:** Leverages LLMs for intelligent understanding and analysis of your document content.
+*   **Document Retrieval:** Finds relevant information within your PDF to provide accurate answers.
+*   **Stateful Conversations:** Remembers previous questions and responses for context-aware interactions.
+*   **User Friendly**: A front end is present, for a better user experience.
+*   **Persistent Data:** Stores conversation state and embeddings for a seamless experience across sessions.
+
+## Technologies Used
+
+*   **Large Language Models (LLMs):**  For natural language understanding and response generation.
+*   **LangChain & LangGraph:** For orchestrating LLMs, retrieval, and tools in a modular way.
+* **Groq**: For faster inference of LLM.
+*   **Nomic Embeddings:** For creating vector representations of document content.
+*   **MongoDB as a Vector Database:** For storing and efficiently querying vector embeddings.
+* **Front end technologies**: The frontend use a framework such as react, or vue, and is well structured.
 
 ## Getting Started
 
-First, run the development server:
+1.  **Prerequisites:**
+    *   Node.js (version 20.x or higher)
+    *   MongoDB (running instance)
+    *   API key for your chosen LLM provider (e.g., OpenAI, Groq)
+    *   API key for Embedding Model (e.g., Nomic)
+    * A front-end framework, such as react.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2.  **Installation:**
+    ```bash
+    git clone <repository-url>
+    cd <project-folder>
+    npm install # For dependencies.
+    ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3.  **Configuration:**
+    *   Create a `.env` file in the project root directory.
+    *   Set environment variables:
+        ```
+        GOOGLE_CLIENT_ID=
+        GOOGLE_CLIENT_SECRET=
+        NEXTAUTH_URL=http://localhost:3000 # Replace with your deployment url, if not local
+        NEXTAUTH_SECRET=
+        MONGODB_URI=mongodb+srv://<username>:<password>@<your-cluster>.mongodb.net/<your-database>?retryWrites=true&w=majority&appName=<your-cluster-name> #Update username, password, cluster, and database name.
+        GROQ_API_KEY=
+        NOMIC_API_KEY=
+        ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4.  **Running the Application:**
+    ```bash
+    # In the root directory
+    npm run dev
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+5. **Accessing the application**:
+    - Go to your web navigator, and go to `localhost:3000`, or the port that you specified in the frontend application.
 
-## Learn More
+## Contributing
 
-To learn more about Next.js, take a look at the following resources:
+We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project is licensed under the [MIT License](LICENSE).
 
-## Deploy on Vercel
+## Contact
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For any questions or inquiries, please contact [your-email@example.com](your-email@example.com).

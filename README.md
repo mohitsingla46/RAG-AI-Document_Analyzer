@@ -1,4 +1,4 @@
-# AI PDF Analyzer
+# AI Document Analyzer
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://your-build-status-url.com)
@@ -7,7 +7,7 @@
 
 ## Overview
 
-The AI PDF Analyzer is a full-stack application that utilizes the power of Large Language Models (LLMs), vector databases, and document retrieval to allow you to interact with your PDF content in a conversational way.  Whether you need to extract specific information, summarize key points, or understand complex data, this tool can help.
+The AI Document Analyzer is a full-stack application that utilizes the power of Large Language Models (LLMs), vector databases, and document retrieval to allow you to interact with your PDF content in a conversational way.  Whether you need to extract specific information, summarize key points, or understand complex data, this tool can help.
 
 ## Key Features
 

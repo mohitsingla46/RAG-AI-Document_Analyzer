@@ -25,16 +25,20 @@ The AI Document Analyzer is a full-stack application that utilizes the power of 
 * **Groq**: For faster inference of LLM.
 *   **Nomic Embeddings:** For creating vector representations of document content.
 *   **MongoDB as a Vector Database:** For storing and efficiently querying vector embeddings.
-* **Front end technologies**: The frontend use a framework such as react, or vue, and is well structured.
+* **Front end technologies**: The frontend use a framework such as Next.js (The React Framework) and is well structured.
 
 ## Getting Started
 
 1.  **Prerequisites:**
     *   Node.js (version 20.x or higher)
-    *   MongoDB (running instance)
-    *   API key for your chosen LLM provider (e.g., OpenAI, Groq)
-    *   API key for Embedding Model (e.g., Nomic)
-    * A front-end framework, such as react.
+    *   MongoDB (running instance, with connection details configured)
+    *   A Google OAuth 2.0 Client ID (`GOOGLE_CLIENT_ID`) and Client Secret (`GOOGLE_CLIENT_SECRET`) for authentication.
+    *   Groq API key (`GROQ_API_KEY`) for LLM.
+    *   Nomic Embedding API key (`NOMIC_API_KEY`).
+    *   `NEXTAUTH_URL` defined (e.g., `http://localhost:3000` or your deployed URL)
+    *   `NEXTAUTH_SECRET` for secure authentication.
+    *   `MONGODB_URI` for connecting to your MongoDB instance.
+
 
 2.  **Installation:**
     ```bash

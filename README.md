@@ -65,14 +65,6 @@ The AI PDF Analyzer is a full-stack application that utilizes the power of Large
 5. **Accessing the application**:
     - Go to your web navigator, and go to `localhost:3000`, or the port that you specified in the frontend application.
 
-## Contributing
-
-We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-
 ## Contact
 
-For any questions or inquiries, please contact [your-email@example.com](your-email@example.com).
+For any questions or inquiries, please contact [mhtkumar46@gmail.com](mhtkumar46@gmail.com).

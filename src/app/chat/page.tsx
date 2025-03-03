@@ -57,14 +57,8 @@ export default function ChatPage() {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || "Failed to delete file");
 
-            setPdfFiles(prevFiles => {
-                const updatedFiles = prevFiles.filter(file => file.name !== fileName);
-                if (updatedFiles.length === 0) {
-                    setPdfFiles([]);
-                    setIsPdfUploaded(false);
-                }
-                return updatedFiles;
-            });
+            setPdfFiles([]);
+            setIsPdfUploaded(false);
             setChatHistory([]);
         } catch (error) {
             console.error("Error deleting file:", error);
@@ -147,6 +141,7 @@ export default function ChatPage() {
                     handleDeleteFile={handleDeleteFile}
                     loading={loading}
                     deletingFile={deletingFile}
+                    isPdfUploaded={isPdfUploaded}
                 />
                 <ChatSection
                     chatHistory={chatHistory}

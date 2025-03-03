@@ -1,5 +1,5 @@
 import clientPromise from "@/app/lib/mongodb";
-import { embeddings } from "@/app/backend/config/embeddings.js";
+import { getEmbeddings } from "@/app/backend/config/embeddings.js";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/backend/lib/auth";
 
@@ -28,7 +28,8 @@ export const saveToVectorStore = async (splitDocs, source, userId) => {
         const vectors = await Promise.all(
             splitDocs.map(async (doc) => {
                 try {
-                    const vector = await embeddings.embedQuery(doc.pageContent);
+                    const documentEmbeddings = getEmbeddings("search_document");
+                    const vector = await documentEmbeddings.embedQuery(doc.pageContent);
                     const EXPECTED_DIMENSIONS = 768;
                     if (!Array.isArray(vector) || vector.length !== EXPECTED_DIMENSIONS) {
                         throw new Error(`Invalid vector: expected ${EXPECTED_DIMENSIONS} dimensions, got ${vector?.length}`);

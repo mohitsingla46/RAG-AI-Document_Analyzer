@@ -13,9 +13,10 @@ interface DocumentUploadSectionProps {
     handleDeleteFile: (fileName: string) => void;
     loading: boolean;
     deletingFile: string | null;
+    isPdfUploaded: boolean;
 }
 
-const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({ pdfFiles, handleFileChange, handleDeleteFile, loading, deletingFile }) => {
+const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({ pdfFiles, handleFileChange, handleDeleteFile, loading, deletingFile, isPdfUploaded }) => {
     return (
         <Card className="w-[30%] bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardContent className="p-6">
@@ -24,8 +25,8 @@ const DocumentUploadSection: React.FC<DocumentUploadSectionProps> = ({ pdfFiles,
                     variant="contained"
                     component="label"
                     fullWidth
-                    disabled={loading || deletingFile !== null}
-                    className={`bg-gradient-to-r from-[#4f46e5] to-[#7c3aed] text-white py-2 rounded-lg shadow-md hover:from-[#4338ca] hover:to-[#6d28d9] transition-all duration-200 ${loading || deletingFile !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={loading || deletingFile !== null || isPdfUploaded}
+                    className={`bg-gradient-to-r from-[#4f46e5] to-[#7c3aed] text-white py-2 rounded-lg shadow-md hover:from-[#4338ca] hover:to-[#6d28d9] transition-all duration-200 ${loading || deletingFile !== null || isPdfUploaded ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     {loading ? (
                         <div className="flex items-center space-x-2">

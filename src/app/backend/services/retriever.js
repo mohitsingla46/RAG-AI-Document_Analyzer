@@ -1,13 +1,14 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { embeddings } from "@/app/backend/config/embeddings.js";
+import { getEmbeddings } from "@/app/backend/config/embeddings.js";
 import { searchVectorStore } from "./vectorStore.js";
 
 const retrieveSchema = z.object({ query: z.string() });
 
 export const retrieve = tool(
     async ({ query }) => {
-        const queryEmbedding = await embeddings.embedQuery(query);
+        const queryEmbeddings = getEmbeddings("search_query");
+        const queryEmbedding = await queryEmbeddings.embedQuery(query);
 
         try {
             const searchResults = await searchVectorStore(queryEmbedding);
